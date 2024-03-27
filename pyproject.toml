@@ -1,0 +1,41 @@
+[project]
+name = "signwriting-translation"
+description = "Translate from spoken to signed languages using SignWriting"
+version = "0.0.1"
+authors = [
+    { name = "Amit Moryossef", email = "amitmoryossef@gmail.com" },
+]
+readme = "README.md"
+dependencies = [
+    "signwriting @ git+https://github.com/sign-language-processing/signwriting",
+]
+
+dev = [
+    "pytest",
+    "pylint"
+]
+
+[tool.yapf]
+based_on_style = "google"
+column_limit = 120
+
+[tool.pylint]
+max-line-length = 120
+disable = [
+    "C0114", # Missing module docstring
+    "C0115", # Missing class docstring
+    "C0116", # Missing function or method docstring
+]
+
+[tool.setuptools]
+packages = [
+    "signwriting_translation"
+]
+
+[tool.pytest.ini_options]
+addopts = "-v"
+testpaths = ["signwriting_translation"]
+
+[project.scripts]
+signwriting_to_text = "signwriting_translation.bin:signwriting_to_text"
+text_to_signwriting = "signwriting_translation.bin:text_to_signwriting"
