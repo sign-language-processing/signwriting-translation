@@ -8,8 +8,12 @@ authors = [
 readme = "README.md"
 dependencies = [
     "signwriting @ git+https://github.com/sign-language-processing/signwriting",
+    "sockeye @ git+https://github.com/sign-language-processing/sockeye",
+    "tokenizers",
+    "huggingface-hub"
 ]
 
+[project.optional-dependencies]
 dev = [
     "pytest",
     "pylint"
@@ -26,6 +30,7 @@ disable = [
     "C0115", # Missing class docstring
     "C0116", # Missing function or method docstring
 ]
+good-names = ["i", "f", "x", "y"]
 
 [tool.setuptools]
 packages = [
