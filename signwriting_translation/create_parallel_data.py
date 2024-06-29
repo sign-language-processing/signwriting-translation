@@ -7,7 +7,7 @@ from signwriting.formats.fsw_to_sign import fsw_to_sign
 from signwriting.tokenizer import SignWritingTokenizer, normalize_signwriting
 from tqdm import tqdm
 
-from spoken_language_tokenizer import tokenize_spoken_text
+from tokenizer import tokenize_spoken_text
 
 csv.field_size_limit(int(1e6))
 
@@ -34,7 +34,7 @@ DIRECTIONS = {
 CLEAN_DIRECTIONS = {
     "spoken-to-signed": {
         "more": 1,
-        "cleaned": 1,
+        "cleaned": 2,  # de emphasize fingerspelling
     },
     "signed-to-spoken": {
         "more": 1,

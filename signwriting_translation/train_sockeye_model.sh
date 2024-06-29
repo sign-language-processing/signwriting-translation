@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=train-sockeye
-#SBATCH --time=48:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=16G
 #SBATCH --output=train-%j.out
 
@@ -85,19 +85,19 @@ function find_vocabulary_factors_files() {
 }
 
 function vocabulary_files() {
-    local base_model_dir=$1
+    local base_vocab_dir=$1
     local type=$2    # e.g., "src" or "trg"
     local type_short=$3    # e.g., "src" or "trg"
     local use_factors=$4  # Pass 'true' or 'false' to use factors
 
-    if [ -z "$base_model_dir" ]; then
+    if [ -z "$base_vocab_dir" ]; then
         return
     fi
 
-    echo "--${type}-vocab $base_model_dir/model/vocab.${type_short}.0.json "
+    echo "--${type}-vocab $base_vocab_dir/vocab.${type_short}.0.json "
 
     if [[ "$use_factors" == "true" ]]; then
-        echo "--${type}-factor-vocabs $(find_vocabulary_factors_files $base_model_dir/model $type_short)"
+        echo "--${type}-factor-vocabs $(find_vocabulary_factors_files $base_vocab_dir $type_short)"
     fi
 }
 
@@ -107,17 +107,20 @@ max_seq_len=2048
 [ "$use_target_factors" == "true" ] && max_seq_len=512
 
 # Prepare data
+if [ -n "$base_model_dir" ]; then
+  vocab_dir="$base_model_dir/model"
+fi
+
 TRAIN_DATA_DIR="$model_dir/train_data"
 [ ! -f "$TRAIN_DATA_DIR/data.version" ] && \
 python -m sockeye.prepare_data \
   --max-seq-len $max_seq_len:$max_seq_len \
-  $(vocabulary_files "$base_model_dir" "source" "src" $use_source_factors) \
+  $(vocabulary_files "$vocab_dir" "source" "src" $use_source_factors) \
   $(translation_files "source" "source" "$data_dir/train" $use_source_factors) \
-  $(vocabulary_files "$base_model_dir" "target" "trg" $use_target_factors) \
+  $(vocabulary_files "$vocab_dir" "target" "trg" $use_target_factors) \
   $(translation_files "target" "target" "$data_dir/train" $use_target_factors) \
   --output $TRAIN_DATA_DIR \
 
-cp tokenizer.json $model_dir/tokenizer.json
 
 MODEL_DIR="$model_dir/model"
 rm -rf $MODEL_DIR
@@ -152,7 +155,8 @@ python -m sockeye.train \
   --learning-rate-reduce-factor 0.7 \
   --decode-and-evaluate 1000 \
   --checkpoint-interval 1000 \
-  --max-num-checkpoint-not-improved 50 \
+  --max-num-checkpoint-not-improved 100 \
+  --min-num-epochs 10 \
   --embed-dropout 0.5 \
   --transformer-dropout-prepost 0.2 \
   --transformer-dropout-act 0.2 \
@@ -162,3 +166,6 @@ python -m sockeye.train \
   --no-bucketing \
   $extra_arguments \
   --output $MODEL_DIR
+
+[ -f tokenizer.json ] &&
+cp tokenizer.json $MODEL_DIR/tokenizer.json

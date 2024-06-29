@@ -8,7 +8,8 @@ from typing import List
 
 from signwriting.tokenizer import SignWritingTokenizer
 from sockeye.inference import TranslatorOutput
-from tokenizers import Tokenizer
+
+from signwriting_translation.tokenizer import tokenize_spoken_text
 
 sw_tokenizer = SignWritingTokenizer()
 
@@ -36,9 +37,9 @@ def load_sockeye_translator(model_path: str, log_timing: bool = False):
     if log_timing:
         print("Loaded sockeye translator in", time.time() - now, "seconds")
 
-    tokenizer = Tokenizer.from_file(str(Path(model_path) / 'tokenizer.json'))
+    tokenizer_path = str(Path(model_path) / 'tokenizer.json')
 
-    return translator, tokenizer
+    return translator, tokenizer_path
 
 
 def translate(translator, texts: List[str], log_timing: bool = False):
@@ -70,8 +71,9 @@ def signwriting_to_text():
     # pylint: disable=unused-variable
     args = get_args()
 
-    translator, tokenizer = load_sockeye_translator(args.model)
-    tokenized_text = " ".join(tokenizer.encode(args.input).tokens)
+    translator, tokenizer_path = load_sockeye_translator(args.model)
+    # tokenized_text = " ".join(tokenizer.encode(args.input).tokens)
+    tokenized_text = tokenize_spoken_text(args.input)  # , tokenizer_path)
     model_input = f"${args.spoken_language} ${args.signed_language} {tokenized_text}"
     outputs = translate(translator, [model_input])
     print(outputs[0])

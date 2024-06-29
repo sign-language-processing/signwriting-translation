@@ -23,10 +23,10 @@ git clone https://github.com/sign-language-processing/signbank-plus.git "$SIGNBA
 [ ! -d "$SIGNBANK_DIR/data/parallel/cleaned" ] && \
 python "$SIGNBANK_DIR/signbank_plus/prep_nmt.py"
 
-# Train a tokenizer
-python spoken_language_tokenizer.py \
-  --files $SIGNBANK_DIR/data/parallel/cleaned/train.target $SIGNBANK_DIR/data/parallel/more/train.target  \
-  --output="tokenizer.json"
+## Train a tokenizer
+#python spoken_language_tokenizer.py \
+#  --files $SIGNBANK_DIR/data/parallel/cleaned/train.target $SIGNBANK_DIR/data/parallel/more/train.target  \
+#  --output="tokenizer.json"
 
 # Prepare the parallel corpus (with source/target-factors)
 python create_parallel_data.py \

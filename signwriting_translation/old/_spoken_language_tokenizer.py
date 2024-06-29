@@ -1,4 +1,4 @@
-import argparse
+import os
 from functools import lru_cache
 from typing import List
 
@@ -9,7 +9,12 @@ from tokenizers.models import BPE
 
 @lru_cache(maxsize=None)
 def load_tokenizer(tokenizer_file: str = 'tokenizer.json'):
-    return Tokenizer.from_file(tokenizer_file)
+    # check if tokenizer_file exists
+    if os.path.exists(tokenizer_file):
+        return Tokenizer.from_file(tokenizer_file)
+
+    from transformers import GPT2TokenizerFast
+    return GPT2TokenizerFast.from_pretrained('Xenova/gpt-4')
 
 
 @lru_cache(maxsize=int(1e7))
@@ -22,7 +27,9 @@ def tokenize_spoken_text(text: str, tokenizer_file: str = 'tokenizer.json'):
 def train(files: List[str], target_file: str):
     tokenizer = Tokenizer(BPE())
     tokenizer.normalizer = normalizers.NFKD()
-    # Take the pre tokenizer setting from GPT-4, https://gist.github.com/xenova/a452a6474428de0182b17605a98631ee
+    # Take the pre tokenizer setting from GPT-4o,
+    # https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py#L101 # TODO
+    # https://gist.github.com/xenova/a452a6474428de0182b17605a98631ee
     tokenizer.pre_tokenizer = pre_tokenizers.Sequence([
         pre_tokenizers.Split(pattern=tokenizers.Regex(
             "(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+"),
@@ -31,11 +38,13 @@ def train(files: List[str], target_file: str):
         pre_tokenizers.ByteLevel(add_prefix_space=False, use_regex=False)
     ])
     tokenizer.decoder = decoders.ByteLevel()
-    trainer = trainers.BpeTrainer(vocab_size=8000)
+    trainer = trainers.BpeTrainer(vocab_size=16000)
     tokenizer.train(files=files, trainer=trainer)
 
     tokenizer.save(target_file)
 
+
+raise Exception("Do not use this tokenizer file")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

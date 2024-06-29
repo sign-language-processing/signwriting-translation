@@ -36,7 +36,7 @@ conda activate sockeye
 
 cd signwriting_translation
 
-MODEL_DIR=/shares/volk.cl.uzh/amoryo/checkpoints/signwriting-translation
+MODEL_DIR=/shares/iict-sp2.ebling.cl.uzh/amoryo/checkpoints/signwriting-translation
 DATA_DIR=/home/amoryo/sign-language/signwriting-translation/parallel
 DIRECTION="spoken-to-signed"
 
@@ -47,21 +47,21 @@ sbatch prepare_data.sh
 # (Train without factors)
 sbatch train_sockeye_model.sh \
  --data_dir="$DATA_DIR/$DIRECTION" \
- --model_dir="$MODEL_DIR/$DIRECTION/no-factors" \
+ --model_dir="$MODEL_DIR/$DIRECTION/no-factors-gpt" \
  --optimized_metric="signwriting-similarity" \
   --partition lowprio
 # (Train with factors)
 sbatch train_sockeye_model.sh \
   --data_dir="$DATA_DIR/$DIRECTION" \
-  --model_dir="$MODEL_DIR/$DIRECTION/target-factors-v4" \
+  --model_dir="$MODEL_DIR/$DIRECTION/target-factors-gpt" \
   --optimized_metric="signwriting-similarity" \
   --use_target_factors=true \
   --partition lowprio
 # (Fine tune model on cleaned data)
 sbatch train_sockeye_model.sh \
   --data_dir="$DATA_DIR-clean/$DIRECTION" \
-  --model_dir="$MODEL_DIR/$DIRECTION/target-factors-tuned" \
-  --base_model_dir="$MODEL_DIR/$DIRECTION/target-factors-v4" \
+  --model_dir="$MODEL_DIR/$DIRECTION/target-factors-gpt-tuned" \
+  --base_model_dir="$MODEL_DIR/$DIRECTION/target-factors-gpt" \
   --optimized_metric="signwriting-similarity" \
   --use_target_factors=true \
   --partition lowprio
@@ -72,7 +72,7 @@ cat "$MODEL_DIR/$DIRECTION/target-factors/model/metrics" | grep "signwriting-sim
 
 # 3. Test it yourself
 python -m signwriting_translation.bin \
-  --model="$MODEL_DIR/$DIRECTION/target-factors-tuned/model" \
+  --model="$MODEL_DIR/$DIRECTION/target-factors-gpt/model" \
   --spoken-language="en" \
   --signed-language="ase" \
   --input="My name is John."
@@ -82,17 +82,19 @@ python -m signwriting_translation.bin \
 
 ```bash
 # Copy the model files to a new directory
-SE_MODEL_PATH="$MODEL_DIR/$DIRECTION/target-factors-tuned"
-HF_MODEL_PATH="$MODEL_DIR/$DIRECTION/huggingface/target-factors-tuned"
+SE_MODEL_PATH="$MODEL_DIR/$DIRECTION/target-factors-gpt-tuned"
+HF_MODEL_PATH="$MODEL_DIR/$DIRECTION/huggingface/target-factors-gpt-tuned"
 
+rm -r  "$HF_MODEL_PATH"
 mkdir -p "$HF_MODEL_PATH"
-cp tokenizer.json "$HF_MODEL_PATH/tokenizer.json"
 cp "$SE_MODEL_PATH/model/params.best" "$HF_MODEL_PATH/params.best"
 cp "$SE_MODEL_PATH/model/version" "$HF_MODEL_PATH/version"
 cp "$SE_MODEL_PATH/model/metrics" "$HF_MODEL_PATH/metrics"
 cp "$SE_MODEL_PATH/model/config" "$HF_MODEL_PATH/config"
 cp "$SE_MODEL_PATH/model/args.yaml" "$HF_MODEL_PATH/args.yaml"
 cp "$SE_MODEL_PATH/model/vocab."* "$HF_MODEL_PATH"
+# if tokenizer exists
+! [ -f "tokenizer.json" ] && cp tokenizer.json "$HF_MODEL_PATH/tokenizer.json"
 
 # Upload to HuggingFace
 huggingface-cli login

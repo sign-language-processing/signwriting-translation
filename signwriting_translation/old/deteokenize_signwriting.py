@@ -26,7 +26,7 @@ def print_factored_prediction(factors_file_template: str):
         print(tokenizer.tokens_to_text((" ".join(symbols)).split(" ")))
 
 
-print_prediction("/home/amoryo/sign-language/signwriting-translation/parallel/spoken-to-signed/test/target.txt")
+# print_prediction("/home/amoryo/sign-language/signwriting-translation/parallel/spoken-to-signed/test/target.txt")
 print_factored_prediction(
     # pylint: disable=line-too-long
-    "/shares/volk.cl.uzh/amoryo/checkpoints/signwriting-translation/spoken-to-signed/target-factors/model/decode.output.{}.00332")
+    "/shares/iict-sp2.ebling.cl.uzh/amoryo/checkpoints/signwriting-translation/spoken-to-signed/target-factors-gpt-tuned/model/decode.output.{}.00248")
