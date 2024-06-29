@@ -10,6 +10,7 @@ dependencies = [
     "signwriting @ git+https://github.com/sign-language-processing/signwriting",
     "sockeye @ git+https://github.com/sign-language-processing/sockeye",
     "tokenizers",
+    "tiktoken",
     "huggingface-hub"
 ]
 
