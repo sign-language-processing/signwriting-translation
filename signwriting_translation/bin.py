@@ -67,7 +67,7 @@ def get_args():
     return parser.parse_args()
 
 
-def signwriting_to_text():
+def text_to_signwriting():
     # pylint: disable=unused-variable
     args = get_args()
 
@@ -79,7 +79,7 @@ def signwriting_to_text():
     print(outputs[0])
 
 
-def text_to_signwriting():
+def signwriting_to_text():
     # pylint: disable=unused-variable
     args = get_args()
 
@@ -87,4 +87,4 @@ def text_to_signwriting():
 
 
 if __name__ == '__main__':
-    signwriting_to_text()
+    text_to_signwriting()
