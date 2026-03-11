@@ -20,6 +20,11 @@ dev = [
     "pylint"
 ]
 
+server = [
+    "fastapi",
+    "uvicorn[standard]",
+]
+
 [tool.yapf]
 based_on_style = "google"
 column_limit = 120
