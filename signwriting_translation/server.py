@@ -16,7 +16,7 @@ translator, _ = load_sockeye_translator(MODEL_ID, log_timing=True)
 app = FastAPI(title="Signwriting Translation API")
 
 
-class TranslationRequest(BaseModel):
+class TranslationRequest(BaseModel):  # pylint: disable=too-few-public-methods
     texts: List[str]
     spoken_language: str
     signed_language: str
