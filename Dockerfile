@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED True
+ENV PYTHONUNBUFFERED=True
 
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -12,4 +12,20 @@ RUN pip install --no-cache-dir ".[server]"
 
 COPY ./signwriting_translation ./signwriting_translation
 
-CMD exec uvicorn signwriting_translation.server:app --host 0.0.0.0 --port $PORT --workers 1
+# Prime the model by starting server, making a request, then stopping
+RUN timeout 360 bash -c '\
+    PORT=8080 uvicorn signwriting_translation.server:app --host 0.0.0.0 --port 8080 --workers 1 & \
+    SERVER_PID=$!; \
+    sleep 30; \
+    curl --fail --retry 10 --retry-delay 5 --retry-connrefused \
+         --location --request POST "http://localhost:8080/" \
+         --header "Content-Type: application/json" \
+         --data "{\"texts\": [\"hello\"], \"spoken_language\": \"en\", \"signed_language\": \"ase\"}"; \
+    CURL_EXIT=$?; \
+    kill $SERVER_PID 2>/dev/null || true; \
+    wait $SERVER_PID 2>/dev/null || true; \
+    exit $CURL_EXIT'
+
+ENV HF_HUB_OFFLINE=1
+
+CMD ["sh", "-c", "uvicorn signwriting_translation.server:app --host 0.0.0.0 --port $PORT --workers 1"]
