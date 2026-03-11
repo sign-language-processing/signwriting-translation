@@ -8,7 +8,7 @@ WORKDIR /app
 
 ADD ./pyproject.toml ./pyproject.toml
 RUN mkdir -p signwriting_translation && touch README.md
-RUN pip install --no-cache-dir ".[server]"
+RUN pip install --no-cache-dir ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY ./signwriting_translation ./signwriting_translation
 

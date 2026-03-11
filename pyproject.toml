@@ -5,6 +5,7 @@ version = "0.0.1"
 authors = [
     { name = "Amit Moryossef", email = "amitmoryossef@gmail.com" },
 ]
+requires-python = ">=3.10"
 readme = "README.md"
 dependencies = [
     "signwriting @ git+https://github.com/sign-language-processing/signwriting",
@@ -17,7 +18,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "pylint"
+    "ruff"
+]
+
+visualization = [
+    "matplotlib",
 ]
 
 server = [
@@ -25,19 +30,24 @@ server = [
     "uvicorn[standard]",
 ]
 
-[tool.yapf]
-based_on_style = "google"
-column_limit = 120
+[tool.ruff]
+line-length = 120
 
-[tool.pylint]
-max-line-length = 120
-disable = [
-    "C0114", # Missing module docstring
-    "C0115", # Missing class docstring
-    "C0116", # Missing function or method docstring
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "C90",  # mccabe complexity
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "PT",   # flake8-pytest-style
+    "W605", # invalid escape sequence
+    "BLE",  # flake8-blind-except
+    "TRY",  # tryceratops
 ]
-good-names = ["i", "f", "x", "y"]
-ignore = ["old", "graph_metrics.py", "create_parallel_data.py"]
 
 [tool.setuptools]
 packages = [
@@ -45,8 +55,8 @@ packages = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-v --ignore=signwriting_translation/old"
-testpaths = ["signwriting_translation"]
+addopts = "-v"
+testpaths = ["tests"]
 
 [project.scripts]
 signwriting_to_text = "signwriting_translation.bin:signwriting_to_text"

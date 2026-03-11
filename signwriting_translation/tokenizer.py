@@ -3,7 +3,7 @@ from functools import lru_cache
 import tiktoken
 
 
-@lru_cache()
+@lru_cache
 def load_tokenizer():
     return tiktoken.get_encoding("cl100k_base")
 

@@ -5,15 +5,14 @@ from pathlib import Path
 
 from signwriting.formats.fsw_to_sign import fsw_to_sign
 from signwriting.tokenizer import SignWritingTokenizer, normalize_signwriting
-from tqdm import tqdm
-
 from tokenizer import tokenize_spoken_text
+from tqdm import tqdm
 
 csv.field_size_limit(int(1e6))
 
 
 def load_csv(data_path: Path):
-    with open(data_path, 'r', encoding="utf-8") as f:
+    with open(data_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         return list(reader)
 
@@ -98,7 +97,6 @@ def create_files(split_dir, spoken_d, signed_d):
     }
 
 
-# pylint: disable=too-many-locals
 def create_parallel_data(data_dir: Path, output_dir: Path, clean_only=False):
     directions_obj = CLEAN_DIRECTIONS if clean_only else DIRECTIONS
 
@@ -125,16 +123,16 @@ def create_parallel_data(data_dir: Path, output_dir: Path, clean_only=False):
                 split_path = data_dir / partition / f"{split}.csv"
                 if not split_path.exists():
                     if split == "train":
-                        raise FileNotFoundError(f"File {split_path} does not exist")
+                        raise FileNotFoundError(f"File {split_path} does not exist")  # noqa: TRY003
                     continue
-                with open(split_path, 'r', encoding="utf-8") as f:
+                with open(split_path, encoding="utf-8") as f:
                     reader = csv.DictReader(f)
                     for row in tqdm(reader):
                         process_row(row, files, spoken_d, repeats)
 
         test_files = create_files(test_dir, spoken_d, signed_d)
         test_path = data_dir / "test" / "all.csv"
-        with open(test_path, 'r', encoding="utf-8") as f:
+        with open(test_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in tqdm(reader):
                 process_row(row, test_files, spoken_d, repeats=1)

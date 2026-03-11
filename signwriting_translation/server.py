@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timezone
-from typing import List
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -16,8 +15,8 @@ translator, _ = load_sockeye_translator(MODEL_ID, log_timing=True)
 app = FastAPI(title="Signwriting Translation API")
 
 
-class TranslationRequest(BaseModel):  # pylint: disable=too-few-public-methods
-    texts: List[str]
+class TranslationRequest(BaseModel):
+    texts: list[str]
     spoken_language: str
     signed_language: str
 
