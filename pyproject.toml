@@ -35,8 +35,10 @@ disable = [
     "C0114", # Missing module docstring
     "C0115", # Missing class docstring
     "C0116", # Missing function or method docstring
+    "R0903", # Too few public methods (Pydantic models)
 ]
 good-names = ["i", "f", "x", "y"]
+ignore = ["old"]
 
 [tool.setuptools]
 packages = [
@@ -44,7 +46,7 @@ packages = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-v"
+addopts = "-v --ignore=signwriting_translation/old"
 testpaths = ["signwriting_translation"]
 
 [project.scripts]
