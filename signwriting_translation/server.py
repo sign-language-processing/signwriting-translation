@@ -1,5 +1,5 @@
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import List
 
 import uvicorn
@@ -26,7 +26,7 @@ class TranslationRequest(BaseModel):  # pylint: disable=too-few-public-methods
 def health():
     return {
         "status": "healthy",
-        "timestamp": datetime.now(tz=UTC).isoformat(),
+        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         "service": "signwriting-translation",
     }
 
