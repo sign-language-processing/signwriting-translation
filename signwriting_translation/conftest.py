@@ -1,7 +1,10 @@
 import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-# Mock heavy dependencies before any test imports server.py
+import pytest
+from fastapi.testclient import TestClient
+
+# Mock heavy dependencies before importing server.py
 # This avoids needing sockeye/torch/tiktoken in the test environment
 sys.modules["signwriting.tokenizer"] = MagicMock()
 sys.modules["sockeye"] = MagicMock()
@@ -10,13 +13,8 @@ sys.modules["sockeye.translate"] = MagicMock()
 sys.modules["tiktoken"] = MagicMock()
 sys.modules["huggingface_hub"] = MagicMock()
 
-from unittest.mock import patch
-
 with patch("signwriting_translation.bin.load_sockeye_translator", return_value=(MagicMock(), None)):
-    from signwriting_translation.server import app
-
-import pytest
-from fastapi.testclient import TestClient
+    from signwriting_translation.server import app  # pylint: disable=wrong-import-position
 
 
 @pytest.fixture()

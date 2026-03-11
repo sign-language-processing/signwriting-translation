@@ -23,10 +23,10 @@ def process_translation_output(output: TranslatorOutput):
 @lru_cache(maxsize=None)
 def load_sockeye_translator(model_path: str, log_timing: bool = False):
     if not Path(model_path).is_dir():
-        from huggingface_hub import snapshot_download
+        from huggingface_hub import snapshot_download  # pylint: disable=import-outside-toplevel
         model_path = snapshot_download(repo_id=model_path)
 
-    from sockeye.translate import parse_translation_arguments, load_translator_from_args
+    from sockeye.translate import parse_translation_arguments, load_translator_from_args  # pylint: disable=import-outside-toplevel
 
     now = time.time()
     args = parse_translation_arguments([
@@ -43,7 +43,7 @@ def load_sockeye_translator(model_path: str, log_timing: bool = False):
 
 
 def translate(translator, texts: List[str], log_timing: bool = False):
-    from sockeye.inference import make_input_from_plain_string
+    from sockeye.inference import make_input_from_plain_string  # pylint: disable=import-outside-toplevel
 
     inputs = [make_input_from_plain_string(sentence_id=i, string=s)
               for i, s in enumerate(texts)]

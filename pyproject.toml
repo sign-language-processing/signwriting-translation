@@ -37,7 +37,7 @@ disable = [
     "C0116", # Missing function or method docstring
 ]
 good-names = ["i", "f", "x", "y"]
-ignore = ["old"]
+ignore = ["old", "graph_metrics.py", "create_parallel_data.py"]
 
 [tool.setuptools]
 packages = [
