@@ -1,4 +1,5 @@
 import os
+from datetime import UTC, datetime
 from typing import List
 
 import uvicorn
@@ -23,7 +24,11 @@ class TranslationRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(tz=UTC).isoformat(),
+        "service": "signwriting-translation",
+    }
 
 
 @app.post("/")
