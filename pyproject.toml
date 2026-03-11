@@ -35,6 +35,7 @@ disable = [
     "C0114", # Missing module docstring
     "C0115", # Missing class docstring
     "C0116", # Missing function or method docstring
+    "R0903", # Too few public methods (false positive for Pydantic models)
 ]
 good-names = ["i", "f", "x", "y"]
 
