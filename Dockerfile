@@ -26,6 +26,8 @@ RUN timeout 360 bash -c '\
     wait $SERVER_PID 2>/dev/null || true; \
     exit $CURL_EXIT'
 
+# Enable offline mode for HuggingFace to skip network checks on startup
+ENV TRANSFORMERS_OFFLINE=1
 ENV HF_HUB_OFFLINE=1
 
 CMD ["sh", "-c", "uvicorn signwriting_translation.server:app --host 0.0.0.0 --port $PORT --workers 1"]
