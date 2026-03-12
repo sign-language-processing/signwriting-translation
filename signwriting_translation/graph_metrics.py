@@ -19,8 +19,8 @@ if __name__ == "__main__":
         model_path = f"{MODELS_DIR}{DIRECTION}/{model_name}"
         if not os.path.exists(f"{model_path}/model/metrics"):
             continue
-        metrics_file = f"{model_path}/model/metrics"
-        with open(metrics_file, 'r', encoding="utf-8") as f:
+        METRICS_FILE = f"{model_path}/model/metrics"
+        with open(METRICS_FILE, encoding="utf-8") as f:
             lines = f.readlines()
             for line in lines:
                 for metric in line.strip().split("\t")[1:]:
