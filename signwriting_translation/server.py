@@ -15,13 +15,16 @@ MODEL_ID = "sign/sockeye-text-to-factored-signwriting"
 translator, _ = load_sockeye_translator(MODEL_ID, log_timing=True)
 
 TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY")
+if not TURNSTILE_SECRET_KEY:
+    msg = "Missing TURNSTILE_SECRET_KEY environment variable"
+    raise RuntimeError(msg)
 
 app = FastAPI(title="Signwriting Translation API")
 
 
 @app.middleware("http")
 async def turnstile_verification(request: Request, call_next):
-    if request.url.path == "/health" or not TURNSTILE_SECRET_KEY:
+    if request.url.path == "/health":
         return await call_next(request)
 
     token = request.headers.get("cf-turnstile-response")

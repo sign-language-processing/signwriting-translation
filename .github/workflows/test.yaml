@@ -28,3 +28,5 @@ jobs:
 
       - name: Test Code
         run: uv run pytest
+        env:
+          TURNSTILE_SECRET_KEY: test
