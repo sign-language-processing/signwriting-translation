@@ -14,7 +14,9 @@ MODEL_ID = "sign/sockeye-text-to-factored-signwriting"
 
 translator, _ = load_sockeye_translator(MODEL_ID, log_timing=True)
 
-TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "")
+TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY")
+if not TURNSTILE_SECRET_KEY:
+    raise RuntimeError("Missing TURNSTILE_SECRET_KEY environment variable")
 
 app = FastAPI(title="Signwriting Translation API")
 
