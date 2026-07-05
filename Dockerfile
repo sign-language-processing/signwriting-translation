@@ -20,7 +20,10 @@ RUN timeout 360 bash -c '\
     curl --fail --retry 10 --retry-delay 5 --retry-connrefused \
          --location --request POST "http://localhost:8080/" \
          --header "Content-Type: application/json" \
-         --data "{\"texts\": [\"hello\"], \"spoken_language\": \"en\", \"signed_language\": \"ase\"}"; \
+         --data "{\"texts\": [\"hello\"], \"spoken_language\": \"en\", \"signed_language\": \"ase\"}" && \
+    curl --fail --location --request POST "http://localhost:8080/signwriting-to-text" \
+         --header "Content-Type: application/json" \
+         --data "{\"texts\": [\"M528x518S15a28472x487S1f010490x502\"], \"spoken_language\": \"en\", \"signed_language\": \"ase\"}"; \
     CURL_EXIT=$?; \
     kill $SERVER_PID 2>/dev/null || true; \
     wait $SERVER_PID 2>/dev/null || true; \
