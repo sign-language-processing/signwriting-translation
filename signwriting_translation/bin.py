@@ -34,7 +34,9 @@ def process_text_output(output: TranslatorOutput) -> str:
 def load_sockeye_translator(model_path: str, log_timing: bool = False):
     if not Path(model_path).is_dir():
         from huggingface_hub import snapshot_download
-        model_path = snapshot_download(repo_id=model_path)
+        # training-only artifacts; the optimizer state alone is ~388MB, larger than the weights
+        model_path = snapshot_download(repo_id=model_path,
+                                       ignore_patterns=["optimizer_best.pkl", "lr_scheduler_best.pkl"])
 
     from sockeye.translate import load_translator_from_args, parse_translation_arguments
 
