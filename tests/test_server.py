@@ -12,6 +12,9 @@ def test_health():
     assert body["status"] == "healthy"
     assert body["service"] == "signwriting-translation"
     assert "timestamp" in body
+    assert "version" in body
+    assert body["version"].startswith("sw-text-")
+    assert ":text-sw-" in body["version"]
 
 
 def test_translate():
@@ -21,6 +24,7 @@ def test_translate():
         "signed_language": "ase",
     })
     assert response.status_code == 200
+    assert len(response.headers["X-Model-Tag"]) == 32
     body = response.json()
     assert body["input"] == ["hello"]
     assert len(body["output"]) == 1
@@ -34,6 +38,7 @@ def test_translate_signwriting_to_text():
         "signed_language": "ase",
     })
     assert response.status_code == 200
+    assert len(response.headers["X-Model-Tag"]) == 32
     body = response.json()
     assert len(body["output"]) == 1
     assert isinstance(body["output"][0], str)
