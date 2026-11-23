@@ -38,6 +38,8 @@ ENV HF_HUB_OFFLINE=1
 
 RUN useradd --create-home --uid 1000 app && chmod -R a+rX /root/.cache && mv /root/.cache/huggingface /opt/hf-cache
 ENV HF_HOME=/opt/hf-cache PORT=8080
+RUN rm -rf /usr/local/lib/python*/ensurepip /usr/local/lib/python*/site-packages/pip /usr/local/lib/python*/site-packages/pip-*.dist-info /opt/venv/lib/python*/site-packages/pip /opt/venv/lib/python*/site-packages/pip-*.dist-info
+
 USER app
 
 CMD ["sh", "-c", "exec uvicorn signwriting_translation.server:app --host 0.0.0.0 --port $PORT --workers 1"]
