@@ -1,11 +1,11 @@
 import hashlib
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Annotated
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
-from typing import Annotated
 from pydantic import BaseModel, Field, StringConstraints
 
 from signwriting_translation.bin import (
@@ -47,7 +47,7 @@ class TranslationRequest(BaseModel):
 def health():
     return {
         "status": "healthy",
-        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+        "timestamp": datetime.now(tz=UTC).isoformat(),
         "service": "signwriting-translation",
         "version": f"sw-text-{sw_to_text_model_tag}:text-sw-{text_to_sw_model_tag}",
     }
