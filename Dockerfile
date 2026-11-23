@@ -1,14 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.15.2-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928
 
 ENV PYTHONUNBUFFERED=True
 
-RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+COPY requirements.lock /opt/requirements.lock
 
 ADD ./pyproject.toml ./pyproject.toml
 RUN mkdir -p signwriting_translation && touch README.md
-RUN pip install --no-cache-dir ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir -r /opt/requirements.lock && pip install --no-deps ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY ./signwriting_translation ./signwriting_translation
 
@@ -34,4 +36,8 @@ RUN timeout 360 bash -c '\
 ENV TRANSFORMERS_OFFLINE=1
 ENV HF_HUB_OFFLINE=1
 
-CMD ["sh", "-c", "uvicorn signwriting_translation.server:app --host 0.0.0.0 --port $PORT --workers 1"]
+RUN useradd --create-home --uid 1000 app && chmod -R a+rX /root/.cache && mv /root/.cache/huggingface /opt/hf-cache
+ENV HF_HOME=/opt/hf-cache PORT=8080
+USER app
+
+CMD ["sh", "-c", "exec uvicorn signwriting_translation.server:app --host 0.0.0.0 --port $PORT --workers 1"]

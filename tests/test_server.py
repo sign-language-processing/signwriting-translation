@@ -59,3 +59,13 @@ def test_translate_missing_field():
         "texts": ["hello"],
     })
     assert response.status_code == 422
+
+
+def test_oversized_batch_rejected():
+    response = client.post("/", json={"texts": ["hello"] * 33, "spoken_language": "en", "signed_language": "ase"})
+    assert response.status_code == 422
+
+
+def test_oversized_text_rejected():
+    response = client.post("/", json={"texts": ["a" * 4097], "spoken_language": "en", "signed_language": "ase"})
+    assert response.status_code == 422

@@ -5,7 +5,8 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, Field, StringConstraints
 
 from signwriting_translation.bin import (
     load_sockeye_translator,
@@ -37,7 +38,7 @@ app = FastAPI(title="Signwriting Translation API")
 
 
 class TranslationRequest(BaseModel):
-    texts: list[str]
+    texts: list[Annotated[str, StringConstraints(max_length=4096)]] = Field(max_length=32)
     spoken_language: str
     signed_language: str
 
@@ -87,4 +88,4 @@ def signwriting_to_spoken_text(request: TranslationRequest, response: Response):
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), reload=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), reload=False)
