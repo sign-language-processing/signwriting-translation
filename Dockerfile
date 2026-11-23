@@ -1,16 +1,15 @@
-FROM python:3.13.18-slim-trixie@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90
+FROM python:3.15.2-slim-trixie
 
 ENV PYTHONUNBUFFERED=True
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.lock /opt/requirements.lock
 
 ADD ./pyproject.toml ./pyproject.toml
 RUN mkdir -p signwriting_translation && touch README.md
 RUN pip install --no-cache-dir torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir -r /opt/requirements.lock && pip install --no-deps ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir --upgrade --upgrade-strategy eager ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY ./signwriting_translation ./signwriting_translation
 
