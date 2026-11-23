@@ -9,7 +9,7 @@ requires-python = ">=3.12"
 readme = "README.md"
 dependencies = [
     "signwriting @ git+https://github.com/sign-language-processing/signwriting",
-    "sockeye @ git+https://github.com/sign-language-processing/sockeye@1f21ea031bda0a4e95884a8d0aa83f87ec8e8a75",
+    "sockeye @ git+https://github.com/sign-language-processing/sockeye@v3.1.39",
     "tokenizers",
     "tiktoken",
     "huggingface-hub"

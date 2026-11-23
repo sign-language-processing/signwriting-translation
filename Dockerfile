@@ -1,6 +1,6 @@
-FROM python:3.15.2-slim-trixie
+FROM python:3.15.2-slim-trixie AS builder
 
-ENV PYTHONUNBUFFERED=True
+ENV PYTHONUNBUFFERED=True HF_HOME=/opt/hf-cache PATH="/opt/venv/bin:$PATH"
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
 
@@ -8,10 +8,13 @@ WORKDIR /app
 
 ADD ./pyproject.toml ./pyproject.toml
 RUN mkdir -p signwriting_translation && touch README.md
-RUN pip install --no-cache-dir torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir --upgrade --upgrade-strategy eager ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
+RUN python -m venv --without-pip /opt/venv
+RUN /usr/local/bin/python -m pip --python /opt/venv/bin/python install --no-cache-dir torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+RUN /usr/local/bin/python -m pip --python /opt/venv/bin/python install --no-cache-dir --upgrade --upgrade-strategy eager ".[server]" --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY ./signwriting_translation ./signwriting_translation
+
+ENV TIKTOKEN_CACHE_DIR=/opt/tiktoken-cache
 
 # Prime the model by starting server, making a request, then stopping
 RUN timeout 360 bash -c '\
@@ -30,14 +33,20 @@ RUN timeout 360 bash -c '\
     wait $SERVER_PID 2>/dev/null || true; \
     exit $CURL_EXIT'
 
-# Enable offline mode for HuggingFace to skip network checks on startup
-# This reduces cold start time on slow networks by ~50% (from ~5.8s to ~2.7s)
-ENV TRANSFORMERS_OFFLINE=1
-ENV HF_HUB_OFFLINE=1
+FROM python:3.15.2-slim-trixie AS runtime
 
-RUN useradd --create-home --uid 1000 app && chmod -R a+rX /root/.cache && mv /root/.cache/huggingface /opt/hf-cache
-ENV HF_HOME=/opt/hf-cache PORT=8080
-RUN rm -rf /usr/local/lib/python*/ensurepip /usr/local/lib/python*/site-packages/pip /usr/local/lib/python*/site-packages/pip-*.dist-info /opt/venv/lib/python*/site-packages/pip /opt/venv/lib/python*/site-packages/pip-*.dist-info
+# The builder supplies the venv; the base interpreter's installer is unnecessary.
+RUN apt-get update && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* /usr/local/lib/python3.15/ensurepip /usr/local/lib/python3.15/site-packages /usr/local/bin/pip* \
+    && useradd --create-home --uid 1000 app
+
+ENV PYTHONUNBUFFERED=True PATH="/opt/venv/bin:$PATH" PORT=8080 \
+    HF_HOME=/opt/hf-cache TIKTOKEN_CACHE_DIR=/opt/tiktoken-cache TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1
+WORKDIR /app
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /opt/hf-cache /opt/hf-cache
+COPY --from=builder /opt/tiktoken-cache /opt/tiktoken-cache
+COPY ./signwriting_translation ./signwriting_translation
 
 USER app
 
