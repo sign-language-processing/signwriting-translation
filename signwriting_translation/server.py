@@ -1,11 +1,12 @@
 import hashlib
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Annotated
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, StringConstraints
 
 from signwriting_translation.bin import (
     load_sockeye_translator,
@@ -14,6 +15,9 @@ from signwriting_translation.bin import (
     translate_to_text,
 )
 from signwriting_translation.tokenizer import tokenize_spoken_text
+
+MAX_TEXT_CHARS = 4096
+MAX_BATCH_SIZE = 32
 
 TEXT_TO_SW_MODEL = "sign/sockeye-text-to-factored-signwriting"
 SW_TO_TEXT_MODEL = "sign/sockeye-signwriting-to-text"
@@ -37,7 +41,7 @@ app = FastAPI(title="Signwriting Translation API")
 
 
 class TranslationRequest(BaseModel):
-    texts: list[str]
+    texts: list[Annotated[str, StringConstraints(max_length=MAX_TEXT_CHARS)]] = Field(max_length=MAX_BATCH_SIZE)
     spoken_language: str
     signed_language: str
 
@@ -46,7 +50,7 @@ class TranslationRequest(BaseModel):
 def health():
     return {
         "status": "healthy",
-        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+        "timestamp": datetime.now(tz=UTC).isoformat(),
         "service": "signwriting-translation",
         "version": f"sw-text-{sw_to_text_model_tag}:text-sw-{text_to_sw_model_tag}",
     }
@@ -87,4 +91,4 @@ def signwriting_to_spoken_text(request: TranslationRequest, response: Response):
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), reload=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), reload=False)
