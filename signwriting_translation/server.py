@@ -16,6 +16,9 @@ from signwriting_translation.bin import (
 )
 from signwriting_translation.tokenizer import tokenize_spoken_text
 
+MAX_TEXT_CHARS = 4096
+MAX_BATCH_SIZE = 32
+
 TEXT_TO_SW_MODEL = "sign/sockeye-text-to-factored-signwriting"
 SW_TO_TEXT_MODEL = "sign/sockeye-signwriting-to-text"
 
@@ -38,7 +41,7 @@ app = FastAPI(title="Signwriting Translation API")
 
 
 class TranslationRequest(BaseModel):
-    texts: list[Annotated[str, StringConstraints(max_length=4096)]] = Field(max_length=32)
+    texts: list[Annotated[str, StringConstraints(max_length=MAX_TEXT_CHARS)]] = Field(max_length=MAX_BATCH_SIZE)
     spoken_language: str
     signed_language: str
 
